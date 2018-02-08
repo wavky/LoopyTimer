@@ -1,3 +1,8 @@
+"""
+Original created by terryltang.
+Modified by Wavky since 2018/2/8.
+"""
+
 from threading import Timer
 
 
@@ -5,7 +10,7 @@ class PyTimer(object):
     """Python equivalent of JavaScript setInterval function 
        Call a function after a specified number of seconds:
 
-            timer = pythonTimer.PyTimer(5.0, handler_func, args=[], kwargs={})
+            timer = PyTimer(5.0, handler_func, args=[], kwargs={})
             timer.start()
             timer.stop()     # stop the timer's action if it's still waiting
 
