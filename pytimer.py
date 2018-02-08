@@ -7,12 +7,17 @@ from threading import Timer
 
 
 class PyTimer(object):
-    """Python equivalent of JavaScript setInterval function 
+    """Python equivalent of JavaScript setInterval function
        Call a function after a specified number of seconds:
 
             timer = PyTimer(5.0, handler_func, args=[], kwargs={})
+
+            timer.set_call_limits(5)    # timer will run eternally if you don't set a limit
+
             timer.start()
-            timer.stop()     # stop the timer's action if it's still waiting
+
+            timer.cancel()     # cancel the timer's further action if it's still waiting,
+            will also destroy timer instance
 
         Ref: https://hg.python.org/cpython/file/2.7/Lib/threading.py
     """
@@ -32,6 +37,7 @@ class PyTimer(object):
         self.has_call_limit = False
         self.logger = None
         self.running = False
+        self._is_destroyed = False
 
     def create_timer(self):
         return Timer(self.interval, self.wrapper_handler, args=self.args, kwargs=self.kwargs)
@@ -45,8 +51,13 @@ class PyTimer(object):
         self.logger_kwargs = kwargs or {}
 
     def set_call_limits(self, num):
-        """ This function sets timer counter as well as its uplimit number """
-        self.has_call_limit = True
+        """
+        This function sets timer counter as well as its upper limit.
+        For correct functionality, you should only call this before start().
+
+        :param num: enable limit if num > 0, otherwise the limit is disable.
+        """
+        self.has_call_limit = num > 0
         self.call_limits = num
         self.count = 0
 
@@ -55,7 +66,8 @@ class PyTimer(object):
             return
         # actually call the timer handler, the timer thread will be destroyed after handler function execution 
         self.timer_handler(*args, **kwargs)
-        if self.has_call_limit: self.count += 1
+        if self.has_call_limit:
+            self.count += 1
         # call logger function 
         if self.logger:
             self.logger(*self.logger_args, **self.logger_kwargs)
@@ -65,20 +77,40 @@ class PyTimer(object):
         self.timer.start()
 
     def start(self):
-        self.running = True
-        # create a new internal timer object of threading.Timer. 
-        self.timer = self.create_timer()
-        self.timer.start()
+        """
+        :raise: RuntimeError if timer has been destroyed/cancel already.
+        """
+        if not self._is_destroyed:
+            self.running = True
+            # create a new internal timer object of threading.Timer.
+            self.timer = self.create_timer()
+            self.timer.start()
+        else:
+            raise RuntimeError('Can not start a destroyed timer.')
 
-    def stop(self):
-        self.running = False
-        self.timer.cancel()
-        # The cancel function only prevents timer being called but the thread might still be active, so make 
-        # sure you call join() to end the thread
-        self.timer.join()
-        # Reset logger and call limit 
+    def cancel(self):
+        """
+        Cancel timer will also destroy timer function.
+        You can not reuse the timer after invoke this function.
+
+        :return:
+        """
+        if not self._is_destroyed:
+            self.running = False
+            self.timer.cancel()
+            # The cancel function only prevents timer being called but the thread might still be active, so make
+            # sure you call join() to end the thread
+            self.timer.join()
+            self.__destroy()
+
+    def __destroy(self):
+        self._is_destroyed = True
+        # Reset logger and call limit
+        self.count = 0
+        self.call_limits = 0
         self.has_call_limit = False
         self.set_logger(None)
+        self.timer_handler = None
 
     def is_running(self):
         return self.running
