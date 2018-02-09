@@ -63,6 +63,8 @@ class LoopyTimer(object):
 
     def wrapper_handler(self, *args, **kwargs):
         if self.has_call_limit and self.count >= self.call_limits:
+            self.running = False
+            self.__destroy()
             return
         # actually call the timer handler, the timer thread will be destroyed after handler function execution 
         self.timer_handler(*args, **kwargs)
@@ -78,9 +80,11 @@ class LoopyTimer(object):
 
     def start(self):
         """
-        :raise: RuntimeError if timer has been destroyed/cancel already.
+        :raise: RuntimeError if timer has been start/cancel/destroyed already.
         """
         if not self._is_destroyed:
+            if self.running is True:
+                raise RuntimeError('Can not start twice.')
             self.running = True
             # create a new internal timer object of threading.Timer.
             self.timer = self.create_timer()
