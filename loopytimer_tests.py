@@ -2,7 +2,7 @@ import datetime
 import signal
 import time
 
-from pytimer import PyTimer
+from loopytimer import LoopyTimer
 
 
 def test_handler_0():
@@ -44,25 +44,26 @@ def timer_factory():
     """ This is a generator to generate timers """
     for ind in range(7):
         if ind == 0:
-            timer = PyTimer(0.5, test_handler_0)
+            timer = LoopyTimer(0.5, test_handler_0)
         elif ind == 1:
-            timer = PyTimer(0.5, test_handler_1, args=["Terry"])
+            timer = LoopyTimer(0.5, test_handler_1, args=["Terry"])
         elif ind == 2:
-            timer = PyTimer(0.5, test_handler_2, args=["Terry", "Tang"])
+            timer = LoopyTimer(0.5, test_handler_2, args=["Terry", "Tang"])
         elif ind == 3:
-            timer = PyTimer(0.5, test_handler_3, kwargs={"firstname": "Terry"})
+            timer = LoopyTimer(0.5, test_handler_3, kwargs={"firstname": "Terry"})
         elif ind == 4:
-            timer = PyTimer(0.5, test_handler_4, kwargs={"firstname": "Terry", "lastname": "Tang"})
+            timer = LoopyTimer(0.5, test_handler_4, kwargs={"firstname": "Terry", "lastname": "Tang"})
         elif ind == 5:
-            timer = PyTimer(0.5, test_handler_5, args=["Terry"], kwargs={"lastname": "Tang"})
+            timer = LoopyTimer(0.5, test_handler_5, args=["Terry"], kwargs={"lastname": "Tang"})
         elif ind == 6:
-            timer = PyTimer(0.5, test_handler_6, args=["Terry", "Tang"], kwargs={"city": "Houston", "state": "Texas"})
+            timer = LoopyTimer(0.5, test_handler_6, args=["Terry", "Tang"],
+                               kwargs={"city": "Houston", "state": "Texas"})
         timer.start()
         yield (timer)
 
 
 def test_pass_arguments():
-    """ This test function test different methods to pass arguments into PyTimer handler """
+    """ This test function test different methods to pass arguments into LoopyTimer handler """
 
     print(">>>>>>>>>>>>>>>>>>> test passing arguments to timer handler <<<<<<<<<<<<<<<<<<<<")
     for temp_timer in timer_factory():
@@ -92,7 +93,7 @@ def verify_timer_interval():
         print("Delay since last call: ", delta.total_seconds() * 1000)  # milliseconds
         last_stamp = datetime.datetime.now()
 
-    timer = PyTimer(1, check_interval)
+    timer = LoopyTimer(1, check_interval)
     timer.start()
 
 

@@ -6,11 +6,11 @@ Modified by Wavky since 2018/2/8.
 from threading import Timer
 
 
-class PyTimer(object):
+class LoopyTimer(object):
     """Python equivalent of JavaScript setInterval function
        Call a function after a specified number of seconds:
 
-            timer = PyTimer(5.0, handler_func, args=[], kwargs={})
+            timer = LoopyTimer(5.0, handler_func, args=[], kwargs={})
 
             timer.set_call_limits(5)    # timer will run eternally if you don't set a limit
 
