@@ -3,7 +3,7 @@ Original created by terryltang.
 Modified by Wavky since 2018/2/8.
 """
 
-from threading import Timer
+import threading
 
 
 class LoopyTimer(object):
@@ -40,7 +40,7 @@ class LoopyTimer(object):
         self._is_destroyed = False
 
     def create_timer(self):
-        return Timer(self.interval, self.wrapper_handler, args=self.args, kwargs=self.kwargs)
+        return threading.Timer(self.interval, self.wrapper_handler, args=self.args, kwargs=self.kwargs)
 
     def set_logger(self, logger, args: list = None, kwargs: dict = None):
         """ This function sets a logger function for the timer, which will be called everytime after
